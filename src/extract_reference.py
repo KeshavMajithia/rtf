@@ -14,9 +14,7 @@ Usage:
 
 import argparse
 import os
-import sys
 import time
-from pathlib import Path
 
 import numpy as np
 import torch
@@ -40,7 +38,7 @@ def main():
     os.makedirs(args.output_dir, exist_ok=True)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"=== Reference Embedding Extraction ===")
+    print("=== Reference Embedding Extraction ===")
     print(f"Device: {device}")
     print(f"Model: {args.model_path}")
     print(f"Shards: {args.shards_dir}")
@@ -148,8 +146,8 @@ def main():
 
     # ── Train Isolation Forest ──
     print(f"\n[4/4] Training Isolation Forest (n_estimators={args.if_estimators})...")
-    from sklearn.ensemble import IsolationForest
     import joblib
+    from sklearn.ensemble import IsolationForest
 
     t1 = time.time()
     iso_forest = IsolationForest(
@@ -179,7 +177,7 @@ def main():
     scores = iso_forest.score_samples(embeddings[:1000])
     print(f"  Sanity check (first 1000): score mean={scores.mean():.4f}, std={scores.std():.4f}")
 
-    print(f"\n=== DONE ===")
+    print("\n=== DONE ===")
     print(f"  reference_embeddings.npz: {emb_path}")
     print(f"  isolation_forest.joblib:  {if_path}")
 

@@ -26,18 +26,16 @@ import json
 import os
 import time
 
+import matplotlib
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, IterableDataset
 
-import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-from matplotlib.lines import Line2D
-
-import pandas as pd
 from pathlib import Path
 
+import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib.lines import Line2D
 
 # ──────────────────────────────────────────────────────────────────────
 # Model loaders
@@ -208,10 +206,10 @@ def compute_metrics(embeddings, labels, encoder_name):
 
     Returns dict with silhouette, knn_acc, linear_probe_acc, n_classes.
     """
-    from sklearn.metrics import silhouette_score
-    from sklearn.neighbors import KNeighborsClassifier
     from sklearn.linear_model import LogisticRegression
+    from sklearn.metrics import silhouette_score
     from sklearn.model_selection import cross_val_score
+    from sklearn.neighbors import KNeighborsClassifier
     from sklearn.preprocessing import LabelEncoder, StandardScaler
 
     # Filter out unlabeled samples (label == -1 or 0 depending on convention)
@@ -444,7 +442,7 @@ def main():
         print(f"  Saved: {emb_path}")
 
         # Compute metrics
-        print(f"  Computing metrics...")
+        print("  Computing metrics...")
         metrics = compute_metrics(
             emb_data["embeddings"],
             emb_data["labels_fine"],

@@ -17,12 +17,11 @@ Verification:
 
 import argparse
 import os
-import sys
 
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from model import LightCurveCompressor
 
@@ -230,7 +229,7 @@ def main():
     print("\n=== DONE ===")
     print(f"  rtf_embed.onnx → {embed_path}")
     print(f"  rtf_recon.onnx → {recon_path}")
-    print(f"\n  Copy these files to boom/data/models/ for deployment.")
+    print("\n  Copy these files to boom/data/models/ for deployment.")
 
 
 if __name__ == "__main__":

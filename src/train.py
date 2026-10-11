@@ -29,7 +29,13 @@ import numpy as np
 import torch
 from torch.utils.data import ConcatDataset, DataLoader, IterableDataset
 
-from dataset import AlertDataset, MetaNPZDataset, PhotoNPZDataset, ShardedDataset, collate_fn
+from dataset import (
+    AlertDataset,
+    MetaNPZDataset,
+    PhotoNPZDataset,
+    ShardedDataset,
+    collate_fn,
+)
 from model import LightCurveCompressor
 
 
@@ -312,7 +318,7 @@ def train_model(
     train_loader = DataLoader(
         train_ds,
         batch_size=batch_size,
-        shuffle=False if is_iterable else True,
+        shuffle=not is_iterable,
         collate_fn=collate_fn,
         num_workers=num_workers,
         pin_memory=pin,
@@ -374,11 +380,11 @@ def train_model(
                 print(f"  Resuming from epoch {start_epoch} (best_val_loss={best_val_loss:.6f})")
             else:
                 # Legacy: raw state dict only
-                model.load_state_dict(ckpt if not isinstance(ckpt, dict) else ckpt)
+                model.load_state_dict(ckpt)
                 start_epoch = 0
                 best_val_loss = float("inf")
                 best_epoch = 0
-                print(f"  Loaded model weights (no epoch info, starting from epoch 0)")
+                print("  Loaded model weights (no epoch info, starting from epoch 0)")
         else:
             print(f"  Warning: {ckpt_path} not found, training from scratch")
             start_epoch = 0

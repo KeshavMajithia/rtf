@@ -126,7 +126,7 @@ def main():
     train_loader = DataLoader(
         train_ds,
         batch_size=args.batch_size,
-        shuffle=False if is_iterable else True,
+        shuffle=not is_iterable,
         collate_fn=collate_fn,
         num_workers=args.num_workers,
         pin_memory=args.device != "cpu",
@@ -171,7 +171,7 @@ def main():
     n_params = sum(p.numel() for p in model.parameters())
 
     print(f"\n{'=' * 60}")
-    print(f"Perceiver IO Masked Autoencoder Training")
+    print("Perceiver IO Masked Autoencoder Training")
     print(f"  Parameters: {n_params:,}")
     print(f"  Batch size: {args.batch_size}")
     print(f"  Latents: {args.n_latents} | Cross layers: {args.n_cross} | Self layers: {args.n_self}")

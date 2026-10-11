@@ -21,10 +21,9 @@ Usage:
 
 import argparse
 import os
-import sys
 import time
-from pathlib import Path
 from multiprocessing import Pool
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -71,7 +70,7 @@ def process_single_npz(npz_path):
         obj_id = Path(npz_path).stem
         return (x, image, label, L, obj_id)
     
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -197,7 +196,7 @@ def main():
     # ── Step 3: Summary ──
     elapsed = time.time() - t_start
     print(f"\n{'=' * 60}")
-    print(f"SHARDING COMPLETE!")
+    print("SHARDING COMPLETE!")
     print(f"{'=' * 60}")
     print(f"  Total files processed: {processed:,}")
     print(f"  Valid samples packed:  {valid:,}")

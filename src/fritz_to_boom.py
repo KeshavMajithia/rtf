@@ -26,8 +26,6 @@ Usage:
 
 import argparse
 import csv
-import os
-import sys
 from pathlib import Path
 
 import numpy as np
@@ -118,7 +116,7 @@ def main():
     # Find all Fritz NPZ files
     npz_files = sorted(fritz_dir.glob("*.npz"))
     npz_files = [f for f in npz_files if f.stem != "fritz_manifest"]
-    print(f"=== Fritz → Boom Converter ===")
+    print("=== Fritz → Boom Converter ===")
     print(f"Input: {fritz_dir} ({len(npz_files)} files)")
     print(f"Output: {output_dir}")
 
@@ -147,7 +145,7 @@ def main():
         writer.writeheader()
         writer.writerows(sources_rows)
 
-    print(f"\n=== DONE ===")
+    print("\n=== DONE ===")
     print(f"  Converted: {n_success}")
     print(f"  Skipped (<5 detections): {n_skip}")
     print(f"  Sources CSV: {sources_csv}")

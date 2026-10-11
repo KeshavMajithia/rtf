@@ -25,11 +25,10 @@ Architecture:
 """
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from model import ImageTower, Time2Vec
-
 
 # ---------------------------------------------------------------------------
 # Core Attention Blocks
@@ -226,7 +225,7 @@ class PerceiverDecoder(nn.Module):
             cont_pred: (B, n_mask, 4) continuous value predictions
             band_pred: (B, n_mask, 3) band classification logits
         """
-        B, n_mask = mask_indices.shape
+        _B, _n_mask = mask_indices.shape
 
         # Gather position queries for masked positions
         # position_queries: (max_len, d_model) → index with mask_indices
@@ -356,7 +355,7 @@ class PerceiverAutoencoder(nn.Module):
             tokens: (B, L+2, d_model)
             token_pad_mask: (B, L+2) — image/meta tokens are never padded
         """
-        B, L, _ = x.shape
+        B, _L, _ = x.shape
 
         # Split channels
         x_phot = x[:, :, :7]     # (B, L, 7)
@@ -455,7 +454,7 @@ class PerceiverAutoencoder(nn.Module):
         Returns:
             dict with 'latents', 'mask_indices', 'mask_valid', 'cont_pred', 'band_pred'
         """
-        B, L, _ = x.shape
+        _B, L, _ = x.shape
 
         # Tokenize
         tokens, token_pad_mask = self._tokenize(x, pad_mask, images)
@@ -575,7 +574,7 @@ class PerceiverAutoencoder(nn.Module):
         Returns:
             (B,) reconstruction error per sample
         """
-        B, L, _ = x.shape
+        B, _L, _ = x.shape
 
         # Tokenize
         tokens, token_pad_mask = self._tokenize(x, pad_mask, images)
@@ -598,7 +597,7 @@ class PerceiverAutoencoder(nn.Module):
 
         # Encode + decode
         latents = self.encoder(all_masked, token_pad_mask)
-        cont_pred, band_pred = self.decoder(latents, mask_indices)
+        cont_pred, _band_pred = self.decoder(latents, mask_indices)
 
         # Per-sample MSE on continuous channels
         batch_idx = torch.arange(B, device=x.device).unsqueeze(1).expand(-1, max_valid)

@@ -10,15 +10,14 @@ The script adds the TEMPO codebase to sys.path so it can import
 photometry_edl. Set TEMPO_ROOT env var if needed.
 """
 import argparse
-import json
 import os
 import sys
 from pathlib import Path
 
 import numpy as np
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 # ---------------------------------------------------------------------------
 # Add TEMPO codebase to path so we can import photometry_edl
@@ -31,33 +30,32 @@ if TEMPO_ROOT not in sys.path:
     sys.path.insert(0, TEMPO_ROOT)
 
 from photometry_edl.models.transformer import (
-    EvidentialClassifier,
     EventTransformerEncoder,
+    EvidentialClassifier,
 )
-
 
 # ---------------------------------------------------------------------------
 # Model config from the best checkpoint
 # ---------------------------------------------------------------------------
-MODEL_CONFIG = dict(
-    d_model=192,
-    n_heads=8,
-    n_layers=6,
-    dropout=0.0,  # inference mode, no dropout
-    band_mode="embed",
-    band_embed_dim=8,
-    time_encoding="dt_first",
-    ff_mult=4,
-)
+MODEL_CONFIG = {
+    "d_model": 192,
+    "n_heads": 8,
+    "n_layers": 6,
+    "dropout": 0.0,  # inference mode, no dropout
+    "band_mode": "embed",
+    "band_embed_dim": 8,
+    "time_encoding": "dt_first",
+    "ff_mult": 4,
+}
 
-CLASSIFIER_CONFIG = dict(
-    num_classes=5,
-    dropout=0.0,  # inference mode
-    pool="cls",
-    use_global_features=True,
-    global_dim=24,
-    global_hidden_dim=192,
-)
+CLASSIFIER_CONFIG = {
+    "num_classes": 5,
+    "dropout": 0.0,  # inference mode
+    "pool": "cls",
+    "use_global_features": True,
+    "global_dim": 24,
+    "global_hidden_dim": 192,
+}
 
 MAX_LEN = 257
 CLASS_NAMES = ["SNI", "SNII", "TDE", "AGN", "CV"]
@@ -184,7 +182,7 @@ def export_onnx(model, output_dir: Path):
 
     onnx_path = output_dir / "tempo_classifier.onnx"
 
-    print(f"\n  Exporting tempo_classifier...")
+    print("\n  Exporting tempo_classifier...")
     torch.onnx.export(
         wrapper,
         (dummy_x, dummy_mask, dummy_global),
@@ -230,7 +228,7 @@ def verify_onnx(onnx_path, wrapper, dummy_x, dummy_mask, dummy_global):
     diff = np.abs(pt_out - ort_out).max()
     print(f"  max diff: {diff:.2e} (threshold: 1e-4)")
     if diff < 1e-4:
-        print(f"  ✓ PASSED verification")
+        print("  ✓ PASSED verification")
     else:
         print(f"  ✗ FAILED — outputs differ by {diff:.6f}")
 
@@ -262,23 +260,23 @@ def main():
     else:
         out_dir = ckpt.parent / "onnx"
 
-    print(f"\n=== TEMPO ONNX Export ===")
+    print("\n=== TEMPO ONNX Export ===")
     print(f"  Checkpoint: {ckpt}")
     print(f"  Output: {out_dir}")
     print(f"  Classes: {CLASS_NAMES}")
 
-    print(f"\n[1/3] Loading model...")
+    print("\n[1/3] Loading model...")
     model = load_model(str(ckpt))
 
-    print(f"\n[2/3] Exporting ONNX graph...")
+    print("\n[2/3] Exporting ONNX graph...")
     onnx_path, wrapper, dx, dm, dg = export_onnx(model, out_dir)
 
-    print(f"\n[3/3] Verifying ONNX output...")
+    print("\n[3/3] Verifying ONNX output...")
     verify_onnx(onnx_path, wrapper, dx, dm, dg)
 
-    print(f"\n=== DONE ===")
+    print("\n=== DONE ===")
     print(f"  tempo_classifier.onnx → {onnx_path}")
-    print(f"\n  Copy to boom/data/models/ for deployment.")
+    print("\n  Copy to boom/data/models/ for deployment.")
 
 
 if __name__ == "__main__":

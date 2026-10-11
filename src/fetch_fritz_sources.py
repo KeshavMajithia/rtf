@@ -14,11 +14,8 @@ Usage:
 
 import argparse
 import csv
-import json
 import os
-import sys
 import time
-from pathlib import Path
 
 import numpy as np
 import requests
@@ -156,7 +153,7 @@ def photometry_to_tensor(phot_data):
     # Filter to ZTF photometry with valid mag
     points = []
     for p in phot_data:
-        instrument = p.get("instrument_name", "")
+        p.get("instrument_name", "")
         filt = p.get("filter", "")
         mag = p.get("mag")
         magerr = p.get("magerr")
@@ -348,7 +345,7 @@ def main():
             writer.writerows(manifest_rows)
         print(f"\nManifest saved: {manifest_path} ({len(manifest_rows)} sources)")
 
-    print(f"\n=== DONE ===")
+    print("\n=== DONE ===")
     print(f"  Fetched: {total_fetched}")
     print(f"  Preprocessed: {total_preprocessed}")
     print(f"  Output dir: {args.output_dir}")

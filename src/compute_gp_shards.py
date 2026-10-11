@@ -276,8 +276,7 @@ def main():
     keys_path = os.path.join(args.output_dir, "gp_keys.txt")
     if all_canonical_keys:
         with open(keys_path, "w") as f:
-            for key in sorted(all_canonical_keys):
-                f.write(f"{key}\n")
+            f.writelines(f"{key}\n" for key in sorted(all_canonical_keys))
         print(f"  Key mapping saved to {keys_path}")
 
 

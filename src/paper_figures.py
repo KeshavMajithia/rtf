@@ -23,17 +23,16 @@ Usage:
 import argparse
 import json
 import os
-import sys
 
-import numpy as np
 import matplotlib
+import numpy as np
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
+from matplotlib import gridspec
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
-import matplotlib.gridspec as gridspec
-
 
 # ======================================================================
 # DESIGN SYSTEM — every figure in this paper uses these constants.
@@ -118,8 +117,8 @@ def draw_chance_line(ax, metric_key, orientation="vertical"):
         return
     level = CHANCE_LEVELS[metric_key]
     label = IF_CHANCE_LABEL if "if_" in metric_key else CHANCE_LABEL
-    kwargs = dict(color="gray", linestyle="--", linewidth=1, alpha=0.6,
-                  label=label, zorder=1)
+    kwargs = {"color": "gray", "linestyle": "--", "linewidth": 1, "alpha": 0.6,
+                  "label": label, "zorder": 1}
     if orientation == "horizontal":
         ax.axvline(level, **kwargs)
     else:
@@ -334,7 +333,7 @@ def fig_backbone_impact(results, output_dir):
     for ax, (key, title, std_key) in zip(axes, metrics):
         vals = [r.get(key, 0) for r in rtf_128]
         errs = [r.get(std_key, 0) if std_key else 0 for r in rtf_128]
-        colors = [BACKBONE_HATCH.get(r.get("backbone", "simple"), "")
+        [BACKBONE_HATCH.get(r.get("backbone", "simple"), "")
                   for r in rtf_128]
 
         bars = ax.bar(x, vals, yerr=errs if std_key else None,
@@ -405,7 +404,7 @@ def fig_umap(results, emb_dir, output_dir):
         if not os.path.exists(emb_path):
             # Try alternate naming
             dim = r.get("embed_dim", 128)
-            alt_name = safe_name.replace(f"_{dim}-d", f"_{dim}-d")
+            safe_name.replace(f"_{dim}-d", f"_{dim}-d")
             emb_path = os.path.join(emb_dir, f"emb_{safe_name}.npz")
 
         if not os.path.exists(emb_path):
@@ -424,12 +423,12 @@ def fig_umap(results, emb_dir, output_dir):
         coords = reducer.fit_transform(emb)
 
         ax = axes[i]
-        for cls in CLASS_COLORS:
+        for cls, cls_color in CLASS_COLORS.items():
             mask = labels == cls
             if mask.sum() == 0:
                 continue
             ax.scatter(coords[mask, 0], coords[mask, 1],
-                       c=CLASS_COLORS[cls], s=12, alpha=0.7,
+                       c=cls_color, s=12, alpha=0.7,
                        edgecolors="none", label=CLASS_SHORT.get(cls, cls))
 
         ax.set_title(f"{name}\n({format_params(r['n_params'])} params, "
@@ -470,7 +469,7 @@ def fig_params_vs_performance(results, output_dir):
         arch = parse_arch(r["encoder"])
         color = ARCH_COLORS.get(arch, "gray")
         backbone = r.get("backbone", "simple")
-        hatch = BACKBONE_HATCH.get(backbone, "")
+        BACKBONE_HATCH.get(backbone, "")
         params = r["n_params"]
         lp = r["linear_probe_acc"]
         ifp = r.get("if_precision_at_k", 0)
@@ -551,7 +550,7 @@ def fig_radar(results, output_dir):
     angles = np.linspace(0, 2 * np.pi, n_metrics, endpoint=False).tolist()
     angles += angles[:1]  # close the polygon
 
-    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw=dict(polar=True))
+    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw={"polar": True})
 
     for r in baselines:
         arch = parse_arch(r["encoder"])
@@ -734,8 +733,8 @@ def fig_concrete_example(results, emb_dir, output_dir):
            ZTF names, classes, and anomaly scores.
     RULE: one real case grounds the aggregate statistics.
     """
-    from sklearn.ensemble import IsolationForest
     from sklearn.decomposition import PCA
+    from sklearn.ensemble import IsolationForest
 
     # Use the best model: RTF 128-D
     emb_path = os.path.join(emb_dir, "emb_rtf_128-d.npz")
@@ -780,7 +779,7 @@ def fig_concrete_example(results, emb_dir, output_dir):
     # Highlight top-k anomalies with rings
     top_coords = coords[ranked_idx[:top_k]]
     top_labels = labels[ranked_idx[:top_k]]
-    top_colors = [CLASS_COLORS.get(l, "gray") for l in top_labels]
+    [CLASS_COLORS.get(l, "gray") for l in top_labels]
     ax_scatter.scatter(top_coords[:, 0], top_coords[:, 1],
                        s=80, facecolors="none", edgecolors="black",
                        linewidths=1.5, zorder=5, label=f"Top-{top_k} anomalies")

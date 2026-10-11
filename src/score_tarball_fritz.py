@@ -15,12 +15,12 @@ import json
 import os
 import sys
 import tarfile
-import tempfile
 import time
 from collections import defaultdict
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -398,7 +398,7 @@ def main():
     print(f"Saved: {csv_path}")
 
     # Print TEMPO class distribution
-    print(f"\nTEMPO class distribution:")
+    print("\nTEMPO class distribution:")
     for cls in CLASS_NAMES:
         n = (df["tempo_class"] == cls).sum()
         print(f"  {cls}: {n} ({100 * n / len(df):.1f}%)")
@@ -443,14 +443,14 @@ def main():
                 agreement = n_match / len(mapped)
 
                 print(f"\n{'='*60}")
-                print(f"TEMPO vs Fritz Comparison")
+                print("TEMPO vs Fritz Comparison")
                 print(f"{'='*60}")
                 print(f"Objects with Fritz classification: {len(fritz_results)}")
                 print(f"Mappable to TEMPO classes: {len(mapped)}")
                 print(f"Agreement: {n_match}/{len(mapped)} ({100*agreement:.1f}%)")
 
                 # Per-class breakdown
-                print(f"\nPer-class agreement:")
+                print("\nPer-class agreement:")
                 for cls in CLASS_NAMES:
                     cls_mask = mapped["fritz_class_broad"] == cls
                     if cls_mask.sum() > 0:
@@ -469,7 +469,7 @@ def main():
                               f"| uncertainty={row['tempo_uncertainty']:.3f}")
 
                 # Confusion matrix
-                from sklearn.metrics import confusion_matrix, classification_report
+                from sklearn.metrics import confusion_matrix
                 y_true_labels = mapped["fritz_class_broad"].values
                 y_pred_labels = mapped["tempo_class"].values
 

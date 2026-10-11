@@ -115,7 +115,7 @@ def extract_embeddings(model, loader, device):
             images = batch["images"].to(device)
 
             emb = model.embed(x, pad_mask, images)  # (B, 128)
-            recon_err = model.reconstruction_error(x, pad_mask, images)  # (B,)
+            model.reconstruction_error(x, pad_mask, images)  # (B,)
 
             all_emb.append(emb.cpu())
             all_fine.append(batch["label_fine"])
@@ -161,7 +161,7 @@ def main():
     train_loader = DataLoader(
         train_ds,
         batch_size=args.batch_size,
-        shuffle=False if is_iterable else True,
+        shuffle=not is_iterable,
         collate_fn=collate_fn,
         num_workers=args.num_workers,
         pin_memory=args.device != "cpu",
@@ -219,7 +219,7 @@ def main():
     effective_batch = args.batch_size * args.grad_accum
 
     print(f"\n{'=' * 60}")
-    print(f"TransientBind Training (v2 — with projection heads)")
+    print("TransientBind Training (v2 — with projection heads)")
     print(f"  Parameters: {n_params:,}")
     print(f"  Batch size: {args.batch_size} × {args.grad_accum} accum = {effective_batch} effective")
     print(f"  Embed dim: {args.embed_dim}")

@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,9 +39,9 @@ if TEMPO_ROOT not in sys.path:
 
 from photometry_edl.data import (
     FeatureStats,
+    _global_features_from_sequence,
     build_event_tensor,
     preprocess_photometry_array,
-    _global_features_from_sequence,
     read_manifest_csv,
 )
 from photometry_edl.taxonomy import get_taxonomy
@@ -194,7 +195,7 @@ def main():
         }
         evidence = sess.run(None, feed)[0][0]  # (5,)
 
-        probs, uncertainty, alpha, S = evidence_to_probs(evidence)
+        probs, uncertainty, _alpha, S = evidence_to_probs(evidence)
         pred_class = int(np.argmax(probs))
 
         results.append({
@@ -233,10 +234,10 @@ def main():
     y_pred = df["pred_class"].values
 
     from sklearn.metrics import (
-        classification_report,
-        confusion_matrix,
         accuracy_score,
         balanced_accuracy_score,
+        classification_report,
+        confusion_matrix,
     )
 
     accuracy = accuracy_score(y_true, y_pred)
@@ -247,7 +248,7 @@ def main():
     )
 
     print(f"\n{'='*60}")
-    print(f"TEMPO ONNX Validation Results")
+    print("TEMPO ONNX Validation Results")
     print(f"{'='*60}")
     print(f"Test samples:       {len(df)}")
     print(f"Accuracy:           {accuracy:.4f}")
@@ -257,7 +258,7 @@ def main():
     # Save report
     report_path = out_dir / "tempo_classification_report.txt"
     with open(report_path, "w") as f:
-        f.write(f"TEMPO ONNX Validation Results\n")
+        f.write("TEMPO ONNX Validation Results\n")
         f.write(f"{'='*60}\n")
         f.write(f"ONNX model: {args.onnx}\n")
         f.write(f"Test samples: {len(df)}\n")
@@ -375,7 +376,7 @@ def main():
         cls_df = df[cls_mask]
         if len(cls_df) > 0:
             summary["per_class"][name] = {
-                "support": int(len(cls_df)),
+                "support": len(cls_df),
                 "accuracy": round(float((cls_df["pred_class"] == i).mean()), 4),
                 "mean_uncertainty": round(float(cls_df["uncertainty"].mean()), 4),
                 "median_uncertainty": round(float(cls_df["uncertainty"].median()), 4),
@@ -390,7 +391,7 @@ def main():
     # Print high-uncertainty examples
     # ------------------------------------------------------------------
     print(f"\n{'='*60}")
-    print(f"Top 10 Most Uncertain Predictions")
+    print("Top 10 Most Uncertain Predictions")
     print(f"{'='*60}")
     top_uncertain = df.nlargest(10, "uncertainty")
     for _, row in top_uncertain.iterrows():

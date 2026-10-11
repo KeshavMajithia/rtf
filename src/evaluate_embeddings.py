@@ -17,7 +17,6 @@ Usage:
 
 import argparse
 import os
-import sys
 import time
 from pathlib import Path
 
@@ -84,7 +83,7 @@ def infer_decomposed(model, x_np, image_np, device):
         # Get forward output for loss decomposition
         out = model(x, pad_mask, images)
         # AE mode: out = (cont_hat, band_logits, z)
-        cont_hat, band_logits, z = out
+        cont_hat, band_logits, _z = out
 
         # Compute recon_cont (MSE on continuous channels)
         valid = ~pad_mask  # (1, L)
@@ -140,7 +139,7 @@ def main():
     print(f"  Found {len(npz_files)} sources")
 
     # Extract
-    print(f"\n[3/3] Extracting embeddings + loss components...")
+    print("\n[3/3] Extracting embeddings + loss components...")
     obj_ids = []
     embeddings = []
     recon_conts = []

@@ -29,11 +29,10 @@ v2 Changelog (post-collapse fix):
 """
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 from model import ImageTower, Time2Vec
-
 
 # ---------------------------------------------------------------------------
 # Branch 1: Light Curve Encoder
@@ -76,7 +75,7 @@ class LightCurveEncoder(nn.Module):
         self.proj = nn.Linear(d_model, embed_dim)
 
     def forward(self, x_phot: torch.Tensor, pad_mask: torch.Tensor) -> torch.Tensor:
-        B, L, _ = x_phot.shape
+        B, _L, _ = x_phot.shape
         h = self.in_proj(x_phot) + self.time2vec(x_phot[..., 0])
 
         # Prepend CLS token

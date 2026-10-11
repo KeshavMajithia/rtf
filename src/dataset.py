@@ -10,6 +10,7 @@ Four dataset classes:
 ShardedDataset is preferred for large-scale training — it eliminates the
 catastrophic GPFS file-open overhead of 1.74M individual np.load() calls.
 """
+from __future__ import annotations
 
 import csv
 import random
@@ -68,7 +69,7 @@ class AlertDataset(Dataset):
         horizon: maximum dt in days (None = no cut)
     """
 
-    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}
+    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}  # noqa: RUF012
 
     def __init__(
         self,
@@ -78,7 +79,7 @@ class AlertDataset(Dataset):
         labels_path: str,
         use_metadata: bool = True,
         max_len: int = 257,
-        horizon: float = None,
+        horizon: float | None = None,
     ):
         self.data_dir = Path(data_dir)
         self.labels_path = Path(labels_path)
@@ -241,7 +242,7 @@ class MetaNPZDataset(Dataset):
     Created by preprocess_alerts.py from raw alerts.npy files.
     """
 
-    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}
+    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}  # noqa: RUF012
 
     def __init__(
         self,
@@ -249,7 +250,7 @@ class MetaNPZDataset(Dataset):
         max_len: int = 257,
         use_images: bool = False,
         use_gp: bool = False,
-        max_detections: int = None,
+        max_detections: int | None = None,
         random_truncate: bool = False,
         min_detections: int = 3,
     ):
@@ -266,7 +267,7 @@ class MetaNPZDataset(Dataset):
         # calling stat() on 200k+ files per directory causes a multi-hour
         # network metadata deadlock. Our preprocess_alerts.py already
         # validated every file, so there are no corrupt files to filter.
-        self.files = sorted(list(self.data_dir.glob("*.npz")))
+        self.files = sorted(self.data_dir.glob("*.npz"))
         if not self.files:
             raise FileNotFoundError(f"No valid NPZ files in {data_dir}")
 
@@ -409,7 +410,7 @@ class ShardedDataset(IterableDataset):
     Peak RAM usage: ~1GB (one shard) instead of ~80GB (all shards).
     """
 
-    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}
+    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}  # noqa: RUF012
 
     def __init__(
         self,
@@ -418,7 +419,7 @@ class ShardedDataset(IterableDataset):
         use_images: bool = False,
         use_gp: bool = False,
         gp_dim: int = 80,
-        max_detections: int = None,
+        max_detections: int | None = None,
         random_truncate: bool = False,
         min_detections: int = 3,
     ):
@@ -485,8 +486,7 @@ class ShardedDataset(IterableDataset):
             n = len(shard["labels"])
 
             # Print progress (only from worker 0 or main process)
-            if worker_info is None or worker_info.id == 0:
-                if (si + 1) % 5 == 0 or si == 0:
+            if (worker_info is None or worker_info.id == 0) and ((si + 1) % 5 == 0 or si == 0):
                     print(f"    [shard {si+1}/{len(shard_indices)}] "
                           f"{yielded:,} samples streamed so far")
 
@@ -594,14 +594,14 @@ class PhotoNPZDataset(Dataset):
         use_metadata: If True, include inter-band colors from NPZ (13 channels).
     """
 
-    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}
+    COARSE_MAP = {0: 0, 1: 1, 2: 1, 3: 1, 4: 1, 5: 1, 6: 1, 7: 2, 8: 3, 9: 4}  # noqa: RUF012
 
     def __init__(
         self,
         data_dir: str,
-        stats_path: str = None,
+        stats_path: str | None = None,
         max_len: int = 257,
-        horizon: float = None,
+        horizon: float | None = None,
         use_metadata: bool = False,
     ):
         self.data_dir = Path(data_dir)
@@ -610,7 +610,7 @@ class PhotoNPZDataset(Dataset):
         self.use_metadata = use_metadata
         self.in_channels = 13 if use_metadata else 7
 
-        candidates = sorted(list(self.data_dir.glob("*.npz")))
+        candidates = sorted(self.data_dir.glob("*.npz"))
         self.files = [f for f in candidates if f.stat().st_size >= 200]
         n_bad = len(candidates) - len(self.files)
         if not self.files:

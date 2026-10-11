@@ -19,9 +19,9 @@ import sys
 import time
 from pathlib import Path
 
+import joblib
 import numpy as np
 import torch
-import joblib
 
 from model import LightCurveCompressor
 
@@ -234,7 +234,7 @@ def main():
                   f"{r['recon_error']:<10.6f} {r['if_score']:<10.4f} "
                   f"{r['classification'][:20]}")
 
-    print(f"\n=== DONE ===")
+    print("\n=== DONE ===")
     print(f"  Total scored: {len(results)}")
     print(f"  Output: {args.output}")
 

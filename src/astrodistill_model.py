@@ -27,16 +27,14 @@ Architecture:
 
     Loss: L2(student_prediction, instance_norm(teacher_target)) at masked positions
 """
+from __future__ import annotations
 
 import copy
-import math
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from torch import nn
 
 from model import ImageTower, Time2Vec
-
 
 # ---------------------------------------------------------------------------
 # Transformer Encoder (returns all layer outputs for top-K averaging)
@@ -260,7 +258,7 @@ class AstroDistill(nn.Module):
             tokens: (B, L+2, d_model)
             token_pad_mask: (B, L+2) — image/meta tokens are never padded
         """
-        B, L, _ = x.shape
+        B, _L, _ = x.shape
 
         # Split channels
         x_phot = x[:, :, :7]     # (B, L, 7)
@@ -439,7 +437,7 @@ class AstroDistill(nn.Module):
     # ------------------------------------------------------------------
 
     @torch.no_grad()
-    def update_teacher(self, decay: float = None):
+    def update_teacher(self, decay: float | None = None):
         """Update teacher weights as EMA of student weights.
 
         Args:

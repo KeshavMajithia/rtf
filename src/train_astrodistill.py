@@ -30,8 +30,8 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader, IterableDataset
 
-from dataset import ShardedDataset, collate_fn
 from astrodistill_model import AstroDistill
+from dataset import ShardedDataset, collate_fn
 
 
 def cosine_ema_schedule(epoch: int, total_epochs: int, ema_start: float, ema_end: float) -> float:
@@ -160,7 +160,7 @@ def main():
     train_loader = DataLoader(
         train_ds,
         batch_size=args.batch_size,
-        shuffle=False if is_iterable else True,
+        shuffle=not is_iterable,
         collate_fn=collate_fn,
         num_workers=args.num_workers,
         pin_memory=args.device != "cpu",
@@ -227,7 +227,7 @@ def main():
     effective_batch = args.batch_size * args.grad_accum
 
     print(f"\n{'=' * 60}")
-    print(f"AstroDistill Training (Data2Vec-style self-distillation)")
+    print("AstroDistill Training (Data2Vec-style self-distillation)")
     print(f"  Parameters: {n_total:,} total ({n_student:,} student + {n_teacher:,} teacher)")
     print(f"  Batch size: {args.batch_size} × {args.grad_accum} accum = {effective_batch} effective")
     print(f"  Encoder: {args.n_layers} layers, d_model={args.d_model}")

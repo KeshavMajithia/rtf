@@ -13,14 +13,13 @@ Usage:
 import argparse
 import json
 import os
-import sys
 import time
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 import requests
 
@@ -80,7 +79,7 @@ def query_fritz_classifications(object_ids, token):
 
             time.sleep(0.2)  # rate limit
 
-        except Exception as e:
+        except Exception:
             n_err += 1
             time.sleep(1)
 
@@ -108,7 +107,7 @@ def main():
     # Load existing predictions
     df = pd.read_csv(args.predictions)
     print(f"Loaded {len(df)} predictions from {args.predictions}")
-    print(f"Class distribution:")
+    print("Class distribution:")
     for cls in CLASS_NAMES:
         n = (df["tempo_class"] == cls).sum()
         print(f"  {cls}: {n}")
@@ -146,7 +145,7 @@ def main():
     unmapped = comp_df[comp_df["fritz_class_broad"].isna()]
 
     print(f"\n{'='*60}")
-    print(f"TEMPO vs Fritz — Full Comparison")
+    print("TEMPO vs Fritz — Full Comparison")
     print(f"{'='*60}")
     print(f"Fritz classified:      {len(fritz_results)}")
     print(f"Mappable to TEMPO:     {len(mapped)}")
@@ -163,7 +162,7 @@ def main():
     print(f"Agreement:             {n_match}/{len(mapped)} ({100*agreement:.1f}%)")
 
     # Per-class
-    print(f"\nPer Fritz class:")
+    print("\nPer Fritz class:")
     for cls in CLASS_NAMES:
         cls_mask = mapped["fritz_class_broad"] == cls
         if cls_mask.sum() > 0:
@@ -172,7 +171,7 @@ def main():
             print(f"  {cls}: {cls_match}/{cls_total} ({100*cls_match/cls_total:.1f}%)")
 
     # Uncertainty analysis: does thresholding help?
-    print(f"\nUncertainty thresholding analysis:")
+    print("\nUncertainty thresholding analysis:")
     for thresh in [0.20, 0.25, 0.30]:
         confident = mapped[mapped["tempo_uncertainty"] <= thresh]
         if len(confident) > 0:
@@ -194,7 +193,7 @@ def main():
                   f"| unc={row['tempo_uncertainty']:.3f}")
 
     # Confusion matrix
-    from sklearn.metrics import confusion_matrix, classification_report
+    from sklearn.metrics import classification_report, confusion_matrix
     y_true = mapped["fritz_class_broad"].values
     y_pred = mapped["tempo_class"].values
 
@@ -229,8 +228,8 @@ def main():
         "total_scored": len(df),
         "fritz_queried": len(all_oids),
         "fritz_found": len(fritz_results),
-        "fritz_mappable": int(len(mapped)),
-        "fritz_unmappable": int(len(unmapped)),
+        "fritz_mappable": len(mapped),
+        "fritz_unmappable": len(unmapped),
         "agreement": round(float(agreement), 4),
         "thresholding": {
             f"thresh_{t}": {

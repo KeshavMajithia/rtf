@@ -185,9 +185,7 @@ def process_source(alerts_path, label, horizon=None, fit_gp=False):
         if feat_dict is not None:
             # Build canonical key list from a full-featured source (114 keys)
             # Use sorted keys from the LONGEST feature dict we've seen
-            if not hasattr(process_source, "_canonical_keys"):
-                process_source._canonical_keys = sorted(feat_dict.keys())
-            elif len(feat_dict) > len(process_source._canonical_keys):
+            if not hasattr(process_source, "_canonical_keys") or len(feat_dict) > len(process_source._canonical_keys):
                 process_source._canonical_keys = sorted(feat_dict.keys())
             canonical_keys = process_source._canonical_keys
 
@@ -204,7 +202,7 @@ def process_source(alerts_path, label, horizon=None, fit_gp=False):
 
 def _process_one(task):
     """Worker function for parallel processing."""
-    oid, split, alerts_path, label_file, output_dir, horizon, fit_gp = task
+    oid, split, alerts_path, _label_file, output_dir, horizon, fit_gp = task
     
     # We are processing unlabelled data.
     label = -1
@@ -218,7 +216,7 @@ def _process_one(task):
 
     x, images, has_image, gp_features = result
     out_path = os.path.join(output_dir, split, f"{oid}.npz")
-    save_dict = dict(x=x, images=images, has_image=has_image, label=np.int64(label))
+    save_dict = {"x": x, "images": images, "has_image": has_image, "label": np.int64(label)}
     if gp_features is not None:
         gp_vec, gp_keys = gp_features
         save_dict["gp_features"] = gp_vec
@@ -252,7 +250,7 @@ def main():
             sources[row["obj_id"]] = row["split"]
             unique_splits.add(row["split"])
 
-    labels_dir = Path(args.labels_dir)
+    Path(args.labels_dir)
 
     for split in unique_splits:
         out_dir = os.path.join(args.output_dir, split)
@@ -264,7 +262,7 @@ def main():
     for oid, split in sources.items():
         # Removing os.path.exists checks because GPFS takes 3ms per check * 500k checks = 30 minutes of silent hanging!
         # If the file is missing, the worker exception handler will catch it safely.
-        out_path = os.path.join(args.output_dir, split, f"{oid}.npz")
+        os.path.join(args.output_dir, split, f"{oid}.npz")
         alerts_path = os.path.join(args.alert_dir, oid, "alerts.npy")
         label_file = None
         

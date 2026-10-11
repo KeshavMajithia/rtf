@@ -25,11 +25,10 @@ import json
 import math
 import os
 import re
-import sys
 import time
-from pathlib import Path
 
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
@@ -193,7 +192,7 @@ def build_physics_prompt(obj_row, feature_row):
 
     # Per-model chi2 breakdown
     chi2_lines = []
-    for model_id, model_name in MODEL_NAMES.items():
+    for model_name in MODEL_NAMES.values():
         chi2_val = feature_row.get(f"param_chi2_{model_name}", None)
         if chi2_val is not None and isinstance(chi2_val, (int, float)) and math.isfinite(chi2_val):
             chi2_lines.append(f"    {model_name}: chi2={chi2_val:.2f}")
@@ -305,7 +304,7 @@ def generate_report(results, output_path, plots_dir=None):
         "# RTF Anomaly Triage Report",
         "",
         f"**Generated:** {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}",
-        f"**Model:** RTF Autoencoder (128-dim, trained on 1.74M ZTF alerts)",
+        "**Model:** RTF Autoencoder (128-dim, trained on 1.74M ZTF alerts)",
         f"**LLM:** {GROQ_MODEL}",
         f"**Sources reviewed:** {len(results)}",
         "",
@@ -333,10 +332,10 @@ def generate_report(results, output_path, plots_dir=None):
 
     # Per-group details
     for group, items in sorted(groups.items()):
-        lines.append(f"---")
-        lines.append(f"")
+        lines.append("---")
+        lines.append("")
         lines.append(f"## {group}")
-        lines.append(f"")
+        lines.append("")
 
         for rank, r in enumerate(items, 1):
             verdict = r.get("verdict", "unknown")
@@ -348,7 +347,7 @@ def generate_report(results, output_path, plots_dir=None):
             emoji = {"interesting": "⭐", "known_type": "📋", "artifact": "🗑️"}.get(verdict, "❓")
 
             lines.append(f"### Rank {rank}: {r['obj_id']} (Score: {r['anomaly_score']:.4f})")
-            lines.append(f"")
+            lines.append("")
 
             # Embed light curve plot if available
             if plots_dir:
@@ -356,17 +355,17 @@ def generate_report(results, output_path, plots_dir=None):
                 png_path = os.path.join(plots_dir, png_name)
                 if os.path.exists(png_path):
                     lines.append(f"![{r['obj_id']}]({plots_dir}/{png_name})")
-                    lines.append(f"")
+                    lines.append("")
 
             lines.append(f"**LLM Verdict:** {emoji} {verdict.replace('_', ' ').title()} (confidence: {confidence:.2f})")
             lines.append(f"**Suggested Type:** {suggested}")
             lines.append(f"**Reasoning:** {reasoning}")
             lines.append(f"**Follow-up:** {followup}")
-            lines.append(f"")
+            lines.append("")
 
             # Key physics features
-            lines.append(f"| Feature | Value |")
-            lines.append(f"|---|---|")
+            lines.append("| Feature | Value |")
+            lines.append("|---|---|")
             lines.append(f"| Recon Error | {r['recon_error']:.4f} ({r['recon_error']/0.001251:.0f}x baseline) |")
             lines.append(f"| IF Score | {r['if_score']:.4f} |")
             lines.append(f"| Detections | {r.get('n_detections', 'N/A')} |")
@@ -389,7 +388,7 @@ def generate_report(results, output_path, plots_dir=None):
                     else:
                         lines.append(f"| {feat_name} | {val} |")
 
-            lines.append(f"")
+            lines.append("")
 
     with open(output_path, "w") as f:
         f.write("\n".join(lines))
@@ -450,15 +449,14 @@ def main():
     report_dir = os.path.dirname(os.path.abspath(args.output_report))
     plots_dir = os.path.join(report_dir, "lightcurves")
     os.makedirs(plots_dir, exist_ok=True)
-    print(f"\n[3/5] Generating light curve plots...")
+    print("\n[3/5] Generating light curve plots...")
     n_plotted = 0
     for _, row in candidates_df.iterrows():
         obj_id = row["obj_id"]
         npz_path = os.path.join(args.fritz_dir, f"{obj_id}.npz")
         png_path = os.path.join(plots_dir, f"{obj_id}.png")
         classification = row.get("classification", "")
-        if os.path.exists(npz_path):
-            if plot_lightcurve(npz_path, png_path, obj_id, classification):
+        if os.path.exists(npz_path) and plot_lightcurve(npz_path, png_path, obj_id, classification):
                 n_plotted += 1
     print(f"  Plotted {n_plotted}/{total} light curves")
 
@@ -528,7 +526,7 @@ def main():
         time.sleep(2.0)
 
     # ── Save results ──
-    print(f"\n[5/5] Saving results...")
+    print("\n[5/5] Saving results...")
     with open(args.output_json, "w") as f:
         json.dump(results, f, indent=2)
     print(f"  JSON: {args.output_json}")
@@ -542,7 +540,7 @@ def main():
     for r in results:
         v = r["verdict"]
         verdicts[v] = verdicts.get(v, 0) + 1
-    print(f"\n=== SUMMARY ===")
+    print("\n=== SUMMARY ===")
     for v, count in sorted(verdicts.items()):
         print(f"  {v}: {count}")
     print(f"  Total: {len(results)}")
@@ -551,7 +549,7 @@ def main():
     print(f"\n  LLM hit rate: {n_interesting}/{len(results)} = "
           f"{n_interesting/len(results)*100:.0f}% interesting")
 
-    print(f"\n=== DONE ===")
+    print("\n=== DONE ===")
 
 
 if __name__ == "__main__":

@@ -10,10 +10,11 @@ in the bottleneck:
 Input: (B, L, 7) padded photometry sequences
   channels: [log1p(dt), log1p(dt_prev), logflux, logflux_err, band_g, band_r, band_i]
 """
+from __future__ import annotations
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
+from torch import nn
 
 
 class Time2Vec(nn.Module):
@@ -305,7 +306,7 @@ class LightCurveCompressor(nn.Module):
         # Image tower
         use_images: bool = False,
         image_backbone: str = "simple",
-        freeze_backbone: bool = None,  # None = auto (freeze for zoobot, not for simple)
+        freeze_backbone: bool | None = None,  # None = auto (freeze for zoobot, not for simple)
         # GP features
         gp_dim: int = 0,
         # Classification head (joint training)
@@ -429,7 +430,7 @@ class LightCurveCompressor(nn.Module):
         GP features: (B, gp_dim) — static per-source vector.
         Both are fused additively with the CLS token after the transformer.
         """
-        B, L, _ = x.shape
+        B, _L, _ = x.shape
         h = self.in_proj(x) + self.time2vec(x[..., 0])
 
         cls = self.cls_tok.expand(B, -1, -1)
@@ -535,7 +536,7 @@ class LightCurveCompressor(nn.Module):
         Returns (B, 3) tensor: [mean_color_gr, color_at_peak, color_slope]
         Sources without both g and r observations get zeros (masked later).
         """
-        B, L, C = x.shape
+        B, _L, _C = x.shape
         valid = ~pad_mask  # (B, L)
         logflux = x[..., 3]  # (B, L)
         band_g = x[..., 4]  # (B, L) one-hot for g
@@ -569,8 +570,8 @@ class LightCurveCompressor(nn.Module):
             # Target 3: color slope (how color changes over time)
             # Use cumulative time to get absolute time for each obs
             cum_time = dt[b].cumsum(0)
-            t_g = cum_time[g_mask].mean()
-            t_r = cum_time[r_mask].mean()
+            cum_time[g_mask].mean()
+            cum_time[r_mask].mean()
             # Early vs late color: split at median time
             med_t = cum_time[v].median()
 
